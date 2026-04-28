@@ -85,9 +85,10 @@ or run as a service with pm2:
 
 ## Build desktop binaries
 
-    npm run build        # macOS + Linux
+    npm run build        # current platform only
     npm run build:mac    # macOS only (dmg + zip, x64 + arm64)
     npm run build:linux  # Linux only (AppImage + deb, x64)
+    npm run build:all    # macOS + Linux (best used in CI)
 
 Output files are written to the `dist/` directory.
 

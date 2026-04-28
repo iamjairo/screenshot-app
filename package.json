@@ -6,7 +6,8 @@
   "scripts": {
     "server": "node index.js -p 3000 --oc 1",
     "start": "electron .",
-    "build": "electron-builder --mac --linux",
+    "build": "node scripts/build.js",
+    "build:all": "electron-builder --mac --linux",
     "build:mac": "electron-builder --mac",
     "build:linux": "electron-builder --linux"
   },
