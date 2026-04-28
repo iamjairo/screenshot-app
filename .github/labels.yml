@@ -24,7 +24,7 @@ labels:
     description: "Docker-related changes or dependency updates"
 
   - name: github-actions
-    color: "000000"
+    color: "2088ff"
     description: "GitHub Actions dependency updates or workflow changes"
 
   - name: electron
