@@ -1,10 +1,10 @@
 {
   "env": "PROD",
   "version": "1.0.0",
-  "title": "WS-Screenshot",
+  "title": "Screenshot App",
   "description": "Screenshot Service",
-  "mainDomain": "screenshot.elest.io",
-  "domains": ["*","screenshot.elest.io"], 
+  "mainDomain": "localhost",
+  "domains": ["*","localhost"], 
   "publicFolder": "./public",
   "TypeAPI": "LOCAL",
   "TypeFS": "LOCAL",

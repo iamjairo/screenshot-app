@@ -1,1 +1,0 @@
-ssh root@xxx.xxx.xxx.xxx "cd ws-screenshot && git pull && npm install && pm2 reload ws-screenshot";

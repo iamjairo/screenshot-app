@@ -44,6 +44,12 @@ Then open http://localhost:3000/ in your browser.
 
 ## Install Node.js 20
 
+**macOS (Homebrew):**
+
+    brew install node
+
+**Linux (Debian/Ubuntu):**
+
     sudo apt -y install curl dirmngr apt-transport-https lsb-release ca-certificates
     curl -sL https://deb.nodesource.com/setup_20.x | sudo -E bash -
     sudo apt -y install nodejs
@@ -84,6 +90,15 @@ or run as a service with pm2:
     npm run build:linux  # Linux only (AppImage + deb, x64)
 
 Output files are written to the `dist/` directory.
+
+## Creating a Release
+
+Push a semver tag to trigger the automated release workflow, which builds and publishes macOS and Linux binaries:
+
+    git tag v1.0.0
+    git push origin v1.0.0
+
+The [Release workflow](https://github.com/iamjairo/screenshot-app/actions/workflows/release.yml) will build the Electron app for both platforms and attach the artifacts to a GitHub Release automatically.
 
 ## Run with Docker (local dev)
 
