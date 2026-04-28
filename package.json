@@ -15,7 +15,10 @@
     "type": "git",
     "url": "git+https://github.com/iamjairo/screenshot-app.git"
   },
-  "author": "iamjairo",
+  "author": {
+    "name": "iamjairo",
+    "email": "iamjairo@users.noreply.github.com"
+  },
   "bugs": {
     "url": "https://github.com/iamjairo/screenshot-app/issues"
   },
