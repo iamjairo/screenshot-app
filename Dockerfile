@@ -1,4 +1,4 @@
-FROM node:20-slim
+FROM node:25-slim
 
 # Install Chromium and all required system libraries in a single layer
 RUN apt-get update \
