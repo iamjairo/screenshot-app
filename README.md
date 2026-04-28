@@ -1,5 +1,11 @@
 # Screenshot App
-A simple way to take a screenshot of a website by providing its URL. Screenshot App includes a simple web UI, a REST API, a Websocket API to automate screenshots, and an **Electron desktop app** for macOS and Linux.
+A simple way to take a screenshot of a website by providing its URL. Screenshot App includes a simple web UI, a REST API, a Websocket API to automate screenshots, and an **Electron desktop app** for macOS and Linux..
+
+DEMO: https://backup15.terasp.net/
+
+![](https://cf.appdrag.com/support-documentatio-cb1e1b/uploads/files/e76ed2f5-943e-4fac-b454-6ebb9208f7a6.gif)
+
+
 
 &nbsp;
 
