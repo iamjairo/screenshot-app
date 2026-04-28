@@ -1,0 +1,30 @@
+services:
+  screenshot-app:
+    image: ${IMAGE_NAME:-screenshot-app}:${IMAGE_TAG:-latest}
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - "3000:3000"
+    environment:
+      - PROXY_SERVER=${PROXY_SERVER:-}
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "wget", "-qO-", "http://localhost:3000/"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 15s
+
+  # Development variant: one-off run, no auto-restart
+  screenshot-app-dev:
+    image: ${IMAGE_NAME:-screenshot-app}:${IMAGE_TAG:-latest}
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - "3000:3000"
+    environment:
+      - PROXY_SERVER=${PROXY_SERVER:-}
+    profiles:
+      - dev
