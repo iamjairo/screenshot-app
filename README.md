@@ -1,9 +1,18 @@
-# ws-screenshot
-A simple way to take a screenshot of a website by providing its URL. ws-screenshot include a simple web UI but also a REST API and a Websocket API to automate screenshots.
+# Screenshot App
+A simple way to take a screenshot of a website by providing its URL. Screenshot App includes a simple web UI, a REST API, a Websocket API to automate screenshots, and an **Electron desktop app** for macOS and Linux.
 
-DEMO: https://backup15.terasp.net/
+&nbsp;
 
-![](https://cf.appdrag.com/support-documentatio-cb1e1b/uploads/files/e76ed2f5-943e-4fac-b454-6ebb9208f7a6.gif)
+# Desktop App
+
+Download the latest release for your platform from the [Releases page](https://github.com/iamjairo/screenshot-app/releases):
+
+| Platform | Download |
+|---|---|
+| macOS (Apple Silicon) | `Screenshot-App-*-arm64.dmg` |
+| macOS (Intel) | `Screenshot-App-*.dmg` |
+| Linux x64 | `Screenshot-App-*.AppImage` |
+| Linux deb | `Screenshot-App-*.deb` |
 
 &nbsp;
 
@@ -11,77 +20,87 @@ DEMO: https://backup15.terasp.net/
 
 Run once:
 
-    docker pull elestio/ws-screenshot.slim
-    docker run -p 3000:3000 -it elestio/ws-screenshot.slim
+    docker compose up
 
-or Run as a docker service:
+Run as a background service:
 
-    docker run --name ws-screenshot -d --restart always -p 3000:3000 -it elestio/ws-screenshot.slim
+    docker compose up -d
 
-Then open http://yourIP:3000/ in your browser
+Or use the Makefile shortcuts:
+
+    make build   # build the image
+    make up      # start in production mode (restart: unless-stopped)
+    make dev     # run one-off dev container in the foreground
+    make push    # tag and push to registry
+
+Then open http://localhost:3000/ in your browser.
 
 &nbsp;
+
 # Requirements
 
-- Linux, Windows or Mac OS
-- Node 12+
+- Linux or macOS
+- Node.js 20+
 
-## Install Node.js 16
+## Install Node.js 20
+
     sudo apt -y install curl dirmngr apt-transport-https lsb-release ca-certificates
-    curl -sL https://deb.nodesource.com/setup_16.x | sudo -E bash -
+    curl -sL https://deb.nodesource.com/setup_20.x | sudo -E bash -
     sudo apt -y install nodejs
 
 ## Clone this repository
-Clone this repo then install NPM dependencies for ws-screenshot:
 
-    git clone git@github.com:elestio/ws-screenshot.git
-    cd ws-screenshot
+    git clone git@github.com:iamjairo/screenshot-app.git
+    cd screenshot-app
     npm install
 
-## Install required dependencies for chrome:
+## Install required system dependencies for Chromium:
 
     ./installPuppeteerNativeDeps.sh
 
-
 &nbsp;
 
-# Run ws-screenshot
+# Development
 
-## Run directly
+## Run the server directly
 
-Finally we can start WS-SCREENSHOT Server one-time:
+    npm run server   # starts the cloudgate server on port 3000
 
-    ./run.sh
-
-or run as a service with pm2
+or run as a service with pm2:
 
     npm install -g pm2
-    pm2 start run.sh --name ws-screenshot
+    pm2 start "npm run server" --name screenshot-app
     pm2 save
 
-## Run with docker (local version for dev)
-Run just once
+## Run the Electron desktop app locally
 
-    docker build -t ws-screenshot .
-    docker run --rm -p 3000:3000 -it ws-screenshot
+    npm install          # installs both runtime and devDependencies
+    npm start            # launches the Electron app
 
-Run as a docker service
+## Build desktop binaries
 
-    docker run --name ws-screenshot -d --restart always -p 3000:3000 -it ws-screenshot
+    npm run build        # macOS + Linux
+    npm run build:mac    # macOS only (dmg + zip, x64 + arm64)
+    npm run build:linux  # Linux only (AppImage + deb, x64)
+
+Output files are written to the `dist/` directory.
+
+## Run with Docker (local dev)
+
+    make dev             # one-off dev container, logs in foreground
 
 ## Run on Kubernetes
-Run with helm
 
-    helm upgrade --install ws-screenshot --namespace ws-screenshot helm/
+    helm upgrade --install screenshot-app --namespace screenshot-app helm/
 
 ## Run with proxy
-Add `PROXY_SERVER` env variable:
 
-    docker run --rm -p 3000:3000 --env PROXY_SERVER=socks5://host:port -it ws-screenshot
+Add the `PROXY_SERVER` environment variable:
 
-> NOTE: Chromium ignores username and password in `--proxy-server` arg
->
-> https://bugs.chromium.org/p/chromium/issues/detail?id=615947
+    docker compose run -e PROXY_SERVER=socks5://host:port screenshot-app
+
+> **Note:** Chromium ignores username and password in `--proxy-server`.
+> See https://bugs.chromium.org/p/chromium/issues/detail?id=615947
 
 &nbsp;
 # Usage
