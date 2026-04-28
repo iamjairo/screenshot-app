@@ -28,6 +28,10 @@
     "electron": "^41.3.0",
     "electron-builder": "^26.8.1"
   },
+  "overrides": {
+    "uuid": "^14.0.0",
+    "nodemailer": "^8.0.7"
+  },
   "build": {
     "appId": "io.github.iamjairo.screenshot-app",
     "productName": "Screenshot App",

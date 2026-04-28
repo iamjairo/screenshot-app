@@ -10,68 +10,16 @@ permissions:
 
 jobs:
   # -------------------------------------------------------------------------
-  # Create the GitHub Release (runs first so upload jobs can attach assets)
+  # Build for Linux
   # -------------------------------------------------------------------------
-  create-release:
-    name: Create GitHub Release
+  build-linux:
+    name: Build Linux
     runs-on: ubuntu-latest
-    outputs:
-      upload_url: ${{ steps.create_release.outputs.upload_url }}
-      tag_name: ${{ github.ref_name }}
 
     steps:
       - uses: actions/checkout@v4
         with:
           fetch-depth: 0
-
-      - name: Generate changelog since last tag
-        id: changelog
-        run: |
-          PREV_TAG=$(git describe --tags --abbrev=0 HEAD^ 2>/dev/null || echo "")
-          if [ -z "$PREV_TAG" ]; then
-            LOG=$(git log --pretty=format:"- %s (%h)" HEAD)
-          else
-            LOG=$(git log --pretty=format:"- %s (%h)" "${PREV_TAG}..HEAD")
-          fi
-          echo "CHANGELOG<<EOF" >> "$GITHUB_OUTPUT"
-          echo "$LOG" >> "$GITHUB_OUTPUT"
-          echo "EOF" >> "$GITHUB_OUTPUT"
-
-      - name: Create Release
-        id: create_release
-        uses: actions/create-release@v1
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        with:
-          tag_name: ${{ github.ref_name }}
-          release_name: "Screenshot App ${{ github.ref_name }}"
-          body: |
-            ## What's Changed
-
-            ${{ steps.changelog.outputs.CHANGELOG }}
-
-            ---
-            ### Downloads
-            | Platform | File |
-            |----------|------|
-            | macOS (Intel) | `Screenshot-App-*-mac.zip` |
-            | macOS (Apple Silicon) | `Screenshot-App-*-arm64-mac.zip` |
-            | macOS installer | `Screenshot-App-*.dmg` / `Screenshot-App-*-arm64.dmg` |
-            | Linux x64 | `Screenshot-App-*.AppImage` |
-            | Linux deb | `Screenshot-App-*.deb` |
-          draft: false
-          prerelease: ${{ contains(github.ref_name, '-') }}
-
-  # -------------------------------------------------------------------------
-  # Build for Linux
-  # -------------------------------------------------------------------------
-  build-linux:
-    name: Build Linux
-    needs: create-release
-    runs-on: ubuntu-latest
-
-    steps:
-      - uses: actions/checkout@v4
 
       - name: Set up Node.js
         uses: actions/setup-node@v4
@@ -98,36 +46,54 @@ jobs:
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Upload AppImage
-        uses: actions/upload-release-asset@v1
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        with:
-          upload_url: ${{ needs.create-release.outputs.upload_url }}
-          asset_path: dist/Screenshot-App-${{ needs.create-release.outputs.tag_name }}.AppImage
-          asset_name: Screenshot-App-${{ needs.create-release.outputs.tag_name }}.AppImage
-          asset_content_type: application/octet-stream
+      - name: Generate changelog since last tag
+        id: changelog
+        run: |
+          PREV_TAG=$(git describe --tags --abbrev=0 HEAD^ 2>/dev/null || echo "")
+          if [ -z "$PREV_TAG" ]; then
+            LOG=$(git log --pretty=format:"- %s (%h)" HEAD)
+          else
+            LOG=$(git log --pretty=format:"- %s (%h)" "${PREV_TAG}..HEAD")
+          fi
+          echo "CHANGELOG<<EOF" >> "$GITHUB_OUTPUT"
+          echo "$LOG" >> "$GITHUB_OUTPUT"
+          echo "EOF" >> "$GITHUB_OUTPUT"
 
-      - name: Upload deb package
-        uses: actions/upload-release-asset@v1
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      - name: Create / update release and upload Linux assets
+        uses: softprops/action-gh-release@v2
         with:
-          upload_url: ${{ needs.create-release.outputs.upload_url }}
-          asset_path: dist/Screenshot-App-${{ needs.create-release.outputs.tag_name }}.deb
-          asset_name: Screenshot-App-${{ needs.create-release.outputs.tag_name }}.deb
-          asset_content_type: application/octet-stream
+          tag_name: ${{ github.ref_name }}
+          name: "Screenshot App ${{ github.ref_name }}"
+          prerelease: ${{ contains(github.ref_name, '-') }}
+          body: |
+            ## What's Changed
+
+            ${{ steps.changelog.outputs.CHANGELOG }}
+
+            ---
+            ### Downloads
+            | Platform | File |
+            |----------|------|
+            | macOS (Intel) | `*-mac.zip` |
+            | macOS (Apple Silicon) | `*-arm64-mac.zip` |
+            | macOS installer | `*.dmg` / `*-arm64.dmg` |
+            | Linux x64 | `*.AppImage` |
+            | Linux deb | `*.deb` |
+          files: |
+            dist/*.AppImage
+            dist/*.deb
 
   # -------------------------------------------------------------------------
   # Build for macOS
   # -------------------------------------------------------------------------
   build-mac:
     name: Build macOS
-    needs: create-release
     runs-on: macos-latest
 
     steps:
       - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
 
       - name: Set up Node.js
         uses: actions/setup-node@v4
@@ -144,42 +110,13 @@ jobs:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           CSC_IDENTITY_AUTO_DISCOVERY: "false"
 
-      - name: Upload macOS DMG (x64)
-        uses: actions/upload-release-asset@v1
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      - name: Create / update release and upload macOS assets
+        uses: softprops/action-gh-release@v2
         with:
-          upload_url: ${{ needs.create-release.outputs.upload_url }}
-          asset_path: dist/Screenshot-App-${{ needs.create-release.outputs.tag_name }}.dmg
-          asset_name: Screenshot-App-${{ needs.create-release.outputs.tag_name }}.dmg
-          asset_content_type: application/octet-stream
-
-      - name: Upload macOS DMG (arm64)
-        uses: actions/upload-release-asset@v1
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        with:
-          upload_url: ${{ needs.create-release.outputs.upload_url }}
-          asset_path: dist/Screenshot-App-${{ needs.create-release.outputs.tag_name }}-arm64.dmg
-          asset_name: Screenshot-App-${{ needs.create-release.outputs.tag_name }}-arm64.dmg
-          asset_content_type: application/octet-stream
-
-      - name: Upload macOS zip (x64)
-        uses: actions/upload-release-asset@v1
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        with:
-          upload_url: ${{ needs.create-release.outputs.upload_url }}
-          asset_path: dist/Screenshot-App-${{ needs.create-release.outputs.tag_name }}-mac.zip
-          asset_name: Screenshot-App-${{ needs.create-release.outputs.tag_name }}-mac.zip
-          asset_content_type: application/zip
-
-      - name: Upload macOS zip (arm64)
-        uses: actions/upload-release-asset@v1
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        with:
-          upload_url: ${{ needs.create-release.outputs.upload_url }}
-          asset_path: dist/Screenshot-App-${{ needs.create-release.outputs.tag_name }}-arm64-mac.zip
-          asset_name: Screenshot-App-${{ needs.create-release.outputs.tag_name }}-arm64-mac.zip
-          asset_content_type: application/zip
+          tag_name: ${{ github.ref_name }}
+          name: "Screenshot App ${{ github.ref_name }}"
+          prerelease: ${{ contains(github.ref_name, '-') }}
+          files: |
+            dist/*.dmg
+            dist/*-mac.zip
+            dist/*-arm64-mac.zip
